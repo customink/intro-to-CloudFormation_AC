@@ -62,3 +62,30 @@ Resources:
           Value: dwilson
         - Key: Name
           Value: SSH_access
+  2ndEc2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId:
+        Fn::FindInMap: # Intrnisic Function
+        - RegionMap
+        - !Ref AWS::Region # Pseudo Parameter
+        - AMI
+      SecurityGroupIds:
+        - sg-03bc7df8e3e7a56af # reference a pre-existing Security Group
+      Tags:
+        - Key: Name
+          Value: !Join # Intrinsic Function, short form
+            - " "
+            - - "2nd EC2 Instance with Fn Join in"
+              - !Ref AWS::Region # Pseudo Parameter
+              - " made by stack"
+              - !Ref AWS::StackName # Pseudo Parameter
+        - Key: env
+          Value: dev
+        - Key: group
+          Value: shared
+        - Key: application
+          Value: opsdev
+        - Key: owner
+          Value: dwilson
