@@ -1,0 +1,19 @@
+Resources:
+  Ec2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-467ca739 # Amazon Linux AMI in N.Virginia
+      Tags:
+        - Key: Name
+          Value: !Join [ ".", [dwilson, cf, test]]
+        - Key: env
+          Value: dev
+        - Key: group
+          Value: shared
+        - Key: application
+          Value: opsdev
+        - Key: owner
+          Value: dwilson
+          Key: anotherTag
+          Value: aSimpleExample

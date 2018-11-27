@@ -1,0 +1,64 @@
+# https://github.com/ACloudGuru/intro-to-CloudFormation_AC
+
+# Pseudo Parameters
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/pseudo-parameter-reference.html
+# Intrinsic Functions
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference.html
+
+Mappings:
+  RegionMap:
+    us-east-1:
+      AMI: ami-009d6802948d06e52
+      # OLD: ami-467ca739
+      # NEW: ami-009d6802948d06e52
+    us-east-2:
+      AMI: ami-02e680c4540db351e
+
+Resources:
+  Ec2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId:
+        Fn::FindInMap: # Intrnisic Function
+        - RegionMap
+        - !Ref AWS::Region # Pseudo Parameter
+        - AMI
+      SecurityGroups:
+        - !Ref MySecurityGroup # Ref
+      Tags:
+        - Key: Name
+          Value: !Join # Intrinsic Function, short form
+            - ""
+            - - "EC2 Instance with Fn Join in "
+              - !Ref AWS::Region # Pseudo Parameter
+              - " made by stack "
+              - !Ref AWS::StackName # Pseudo Parameter
+        - Key: env
+          Value: dev
+        - Key: group
+          Value: shared
+        - Key: application
+          Value: opsdev
+        - Key: owner
+          Value: dwilson
+  MySecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Enable SSH access via port 22
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: env
+          Value: dev
+        - Key: group
+          Value: shared
+        - Key: application
+          Value: opsdev
+        - Key: owner
+          Value: dwilson
+        - Key: Name
+          Value: SSH_access
