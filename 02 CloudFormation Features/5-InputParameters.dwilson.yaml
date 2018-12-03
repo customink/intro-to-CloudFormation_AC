@@ -1,0 +1,104 @@
+# https://github.com/ACloudGuru/intro-to-CloudFormation_AC
+
+# Pseudo Parameters
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/pseudo-parameter-reference.html
+# Intrinsic Functions
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference.html
+
+Parameters: # User Input Parameter that is Required, because there is no default.
+  OwnerName:
+    Description: "Owner of this resource. First Initial and Last Name."
+    Type: String
+  DeployEnv:
+    Description: "Environment this resource will exist in."
+    Type: String
+    AllowedValues:
+      - prod
+      - staging
+      - dev
+    Default: dev
+
+Mappings:
+  RegionMap:
+    us-east-1:
+      AMI: ami-009d6802948d06e52
+      # OLD: ami-467ca739
+      # NEW: ami-009d6802948d06e52
+    us-east-2:
+      AMI: ami-02e680c4540db351e
+
+Resources:
+  Ec2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId:
+        Fn::FindInMap: # Intrnisic Function
+        - RegionMap
+        - !Ref AWS::Region # Pseudo Parameter
+        - AMI
+      SecurityGroups:
+        - !Ref MySecurityGroup # Ref
+      Tags:
+        - Key: Name
+          Value: !Join # Intrinsic Function, short form
+            - ""
+            - - "EC2 Instance with Fn Join in "
+              - !Ref AWS::Region # Pseudo Parameter
+              - " made by stack "
+              - !Ref AWS::StackName # Pseudo Parameter
+        - Key: env
+          Value: !Ref DeployEnv
+        - Key: group
+          Value: shared
+        - Key: application
+          Value: opsdev
+        - Key: owner
+          Value: !Ref OwnerName
+  MySecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Enable SSH access via port 22
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: env
+          Value: !Ref DeployEnv
+        - Key: group
+          Value: shared
+        - Key: application
+          Value: opsdev
+        - Key: owner
+          Value: !Ref OwnerName
+        - Key: Name
+          Value: SSH_access
+  2ndEc2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId:
+        Fn::FindInMap: # Intrnisic Function
+        - RegionMap
+        - !Ref AWS::Region # Pseudo Parameter
+        - AMI
+      SecurityGroupIds:
+        - sg-03bc7df8e3e7a56af # reference a pre-existing Security Group
+      Tags:
+        - Key: Name
+          Value: !Join # Intrinsic Function, short form
+            - " "
+            - - "2nd EC2 Instance with Fn Join in"
+              - !Ref AWS::Region # Pseudo Parameter
+              - " made by stack"
+              - !Ref AWS::StackName # Pseudo Parameter
+        - Key: env
+          Value: !Ref DeployEnv
+        - Key: group
+          Value: shared
+        - Key: application
+          Value: opsdev
+        - Key: owner
+          Value: !Ref OwnerName
