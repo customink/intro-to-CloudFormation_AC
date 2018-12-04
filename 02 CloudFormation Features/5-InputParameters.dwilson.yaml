@@ -5,6 +5,9 @@
 # Intrinsic Functions
   # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference.html
 
+# What Outputs can we get from EC2 Instances? See the "Return Values" section of
+#  https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-instance.html
+
 Parameters: # User Input Parameter that is Required, because there is no default.
   OwnerName:
     Description: "Owner of this resource. First Initial and Last Name."
