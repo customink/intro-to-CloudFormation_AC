@@ -19,7 +19,7 @@ Parameters: # User Input Parameter that is Required, because there is no default
     Default: dev
 
 Mappings:
-  RegionMap:
+  RegionMap: #Logical Name
     us-east-1:
       AMI: ami-009d6802948d06e52
       # OLD: ami-467ca739
@@ -28,7 +28,7 @@ Mappings:
       AMI: ami-02e680c4540db351e
 
 Resources:
-  Ec2Instance:
+  Ec2Instance: # Logical Name
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.micro
@@ -55,7 +55,7 @@ Resources:
           Value: opsdev
         - Key: owner
           Value: !Ref OwnerName
-  MySecurityGroup:
+  MySecurityGroup: # Logical Name
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
       GroupDescription: Enable SSH access via port 22
@@ -75,7 +75,7 @@ Resources:
           Value: !Ref OwnerName
         - Key: Name
           Value: SSH_access
-  2ndEc2Instance:
+  2ndEc2Instance: # Logical Name
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.micro
@@ -102,3 +102,26 @@ Resources:
           Value: opsdev
         - Key: owner
           Value: !Ref OwnerName
+
+Outputs:
+  Ec2InstancePrivDNS: # Lopgical Name
+    Description: "Private DNS of our Ec2Instance."
+    Value: !GetAtt # Intrinsic Function
+      - Ec2Instance
+      - PrivateDnsName
+  Ec2InstancePubDNS:
+    Description: "Public DNS of our Ec2Instance."
+    Value: !GetAtt
+      - Ec2Instance
+      - PublicDnsName
+
+  2ndEc2InstancePrivDNS:
+    Description: "Private DNS of our 2ndEc2Instance."
+    Value: !GetAtt
+      - Ec2Instance
+      - PrivateDnsName
+  2ndEc2InstancePubDNS:
+    Description: "Public DNS of our 2ndEc2Instance."
+    Value: !GetAtt
+      - Ec2Instance
+      - PublicDnsName
