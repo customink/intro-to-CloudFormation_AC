@@ -107,24 +107,24 @@ Resources:
           Value: !Ref OwnerName
 
 Outputs:
-  Ec2InstancePrivDNS: # Lopgical Name
-    Description: "Private DNS of our Ec2Instance."
-    Value: !GetAtt # Intrinsic Function
-      - Ec2Instance
-      - PrivateDnsName
-  Ec2InstancePubDNS:
-    Description: "Public DNS of our Ec2Instance."
-    Value: !GetAtt
-      - Ec2Instance
-      - PublicDnsName
+ Ec2InstancePrivDNS: # Lopgical Name
+   Description: "Private DNS of our Ec2Instance."
+   Value: !GetAtt # Intrinsic Function
+     - Ec2Instance
+     - PrivateDnsName
+ Ec2InstancePubDNS:
+   Description: "Public DNS of our Ec2Instance."
+   Value: !GetAtt
+     - Ec2Instance
+     - PublicDnsName
 
-  2ndEc2InstancePrivDNS:
-    Description: "Private DNS of our 2ndEc2Instance."
-    Value: !GetAtt
-      - Ec2Instance
-      - PrivateDnsName
-  2ndEc2InstancePubDNS:
-    Description: "Public DNS of our 2ndEc2Instance."
-    Value: !GetAtt
-      - Ec2Instance
-      - PublicDnsName
+ 2ndEc2InstancePrivDNS:
+   Description: "Private DNS of our 2ndEc2Instance."
+   Value: !GetAtt
+     - 2ndEc2Instance
+     - PrivateDnsName
+ 2ndEc2InstancePubDNS:
+   Description: "Public DNS of our 2ndEc2Instance."
+   Value: !GetAtt
+     - 2ndEc2Instance
+     - PublicDnsName
