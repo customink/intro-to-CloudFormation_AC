@@ -1,0 +1,160 @@
+# https://github.com/ACloudGuru/intro-to-CloudFormation_AC
+
+# Pseudo Parameters
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/pseudo-parameter-reference.html
+# Intrinsic Functions
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference.html
+
+# What Outputs can we get from EC2 Instances? See the "Return Values" section of
+#  https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-instance.html
+
+Parameters: # User Input Parameter that is Required, because there is no default.
+  OwnerName:
+    Description: "Owner of this resource. First Initial and Last Name."
+    Type: String
+  DeployEnv:
+    Description: "Environment this resource will exist in."
+    Type: String
+    AllowedValues:
+      - prod
+      - staging
+      - dev
+    Default: dev
+
+Mappings:
+  RegionMap: #Logical Name
+    us-east-1:
+      AMI: ami-009d6802948d06e52
+      # OLD: ami-467ca739
+      # NEW: ami-009d6802948d06e52
+    us-east-2:
+      AMI: ami-02e680c4540db351e
+
+Resources:
+  Ec2Instance: # Logical Name
+    Type: AWS::EC2::Instance
+    Metadata:
+      AWS::CloudFormation::Init: # requires AWS Helper Scripts. uses cfn-init
+        config:
+          packages:
+            yum:
+              httpd: []
+              php: []
+          files:
+            /var/www/html/index.php:
+              content: |
+                <?php print "Hello world Abs was here!"; ?>
+          services:
+            sysvinit:
+              httpd:
+                enabled: true
+                ensureRunning: true
+    Properties:
+      InstanceType: t2.micro
+      ImageId:
+        Fn::FindInMap: # Intrnisic Function
+        - RegionMap
+        - !Ref AWS::Region # Pseudo Parameter
+        - AMI
+      SecurityGroups:
+        - !Ref MySecurityGroup # Ref
+      UserData:
+        'Fn::Base64':
+          !Sub | # Sub Intrinsic enables expansion of Parameters & Pseudo Parameters
+            #!/bin/bash -xe
+            # Ensure AWS CFN Bootstrap is the latest
+            yum install -y aws-cfn-bootstrap
+            # Install the files and packages from the metadata
+            /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Ec2Instance  --region ${AWS::Region}
+      Tags:
+        - Key: Name
+          Value: !Join # Intrinsic Function, short form
+            - ""
+            - - "EC2 Instance with Fn Join in "
+              - !Ref AWS::Region # Pseudo Parameter
+              - " made by stack "
+              - !Ref AWS::StackName # Pseudo Parameter
+        - Key: env
+          Value: !Ref DeployEnv
+        - Key: group
+          Value: shared
+        - Key: application
+          Value: opsdev
+        - Key: owner
+          Value: !Ref OwnerName
+  MySecurityGroup: # Logical Name
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Enable SSH access via port 22
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: env
+          Value: !Ref DeployEnv
+        - Key: group
+          Value: shared
+        - Key: application
+          Value: opsdev
+        - Key: owner
+          Value: !Ref OwnerName
+        - Key: Name
+          Value: SSH_access
+  2ndEc2Instance: # Logical Name
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId:
+        Fn::FindInMap: # Intrnisic Function
+        - RegionMap
+        - !Ref AWS::Region # Pseudo Parameter
+        - AMI
+      SecurityGroupIds:
+        - sg-03bc7df8e3e7a56af # reference a pre-existing Security Group
+      Tags:
+        - Key: Name
+          Value: !Join # Intrinsic Function, short form
+            - " "
+            - - "2nd EC2 Instance with Fn Join in"
+              - !Ref AWS::Region # Pseudo Parameter
+              - " made by stack"
+              - !Ref AWS::StackName # Pseudo Parameter
+        - Key: env
+          Value: !Ref DeployEnv
+        - Key: group
+          Value: shared
+        - Key: application
+          Value: opsdev
+        - Key: owner
+          Value: !Ref OwnerName
+
+Outputs:
+  Ec2InstancePrivDNS: # Lopgical Name
+   Description: "Private DNS of our Ec2Instance."
+   Value: !GetAtt # Intrinsic Function
+     - Ec2Instance
+     - PrivateDnsName
+  Ec2InstancePubDNS:
+   Description: "Public DNS of our Ec2Instance."
+   Value: !GetAtt
+     - Ec2Instance
+     - PublicDnsName
+  Ec2InstanceHTTPEndpoint:
+   Description: "The HTTP Endpoint for our Ec2Instance"
+   Value: !Sub "http://${Ec2Instance.PublicDnsName}"
+  2ndEc2InstancePrivDNS:
+   Description: "Private DNS of our 2ndEc2Instance."
+   Value: !GetAtt
+     - 2ndEc2Instance
+     - PrivateDnsName
+  2ndEc2InstancePubDNS:
+   Description: "Public DNS of our 2ndEc2Instance."
+   Value: !GetAtt
+     - 2ndEc2Instance
+     - PublicDnsName
