@@ -50,6 +50,7 @@ Resources:
                 enabled: true
                 ensureRunning: true
     Properties:
+      KeyName: webops-charlie-key # see LastPass for private key
       InstanceType: t2.micro
       ImageId:
         Fn::FindInMap: # Intrnisic Function
@@ -109,6 +110,7 @@ Resources:
   2ndEc2Instance: # Logical Name
     Type: AWS::EC2::Instance
     Properties:
+      KeyName: webops-charlie-key # see LastPass for private key
       InstanceType: t2.micro
       ImageId:
         Fn::FindInMap: # Intrnisic Function
